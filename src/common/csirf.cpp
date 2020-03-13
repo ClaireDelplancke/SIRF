@@ -224,7 +224,10 @@ cSIRF_equalImages(const void* ptr_im_a, const void* ptr_im_b)
     }
     CATCH;
 }
-void* cSIRF_ImageData_reorient(void* im_ptr, void *geom_info_ptr)
+
+extern "C"
+void* 
+cSIRF_ImageData_reorient(void* im_ptr, void *geom_info_ptr)
 {
     try {
         ImageData& id = objectFromHandle<ImageData>(im_ptr);

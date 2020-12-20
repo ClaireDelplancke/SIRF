@@ -1,18 +1,18 @@
 #! /bin/bash
 
-loc_data=/home/sirfuser/data/cardiac_resp
+loc_data=~/data/cardiac_resp
 loc_algo=~/devel/claire/SIRF/examples/Python/PETMR
 loc_reco=~/devel/claire/gated/recons
 loc_param=~/devel/claire/gated_pdhg/params
                        
 
-python $loc_algo/PET_MCIR_PD.py             \
+python3.8 $loc_algo/PET_MCIR_PD.py             \
 -o gated_pdhg                              \
 --algorithm=pdhg                            \
 -r FGP_TV                                   \
 --outpath=$loc_reco                        \
 --param_path=$loc_param                    \
--e 500                                     \
+-e 50000                                     \
 --update_obj_fn_interval=10                \
 --descriptive_fname                         \
 -v 0                                        \
@@ -26,8 +26,7 @@ python $loc_algo/PET_MCIR_PD.py             \
 --alpha=5.0                                \
 --dxdy=3.12117                             \
 --nxny=180                                 \
---numThreads=27                            \
---gamma=2.8284271247461903                 
+--numThreads=27                            
 
 
 

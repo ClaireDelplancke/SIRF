@@ -86,15 +86,15 @@ import numpy as np
 from sirf.Utilities import error, show_2D_array, examples_data_path
 import sirf.Reg as reg
 import sirf.STIR as pet
-from ccpi.framework import BlockDataContainer, ImageGeometry, BlockGeometry
-from ccpi.optimisation.algorithms import PDHG, SPDHG
-from ccpi.optimisation.functions import \
-    KullbackLeibler, BlockFunction, IndicatorBox, MixedL21Norm, ScaledFunction
-from ccpi.optimisation.operators import \
-    CompositionOperator, BlockOperator, LinearOperator, Gradient, ScaledOperator
-from ccpi.plugins.regularisers import FGP_TV
+from cil.framework import BlockDataContainer, ImageGeometry, BlockGeometry
+from cil.optimisation.algorithms import PDHG, SPDHG
+from cil.optimisation.functions import \
+    KullbackLeibler, BlockFunction, IndicatorBox, MixedL21Norm, ScaledFunction, L2NormSquared
+from cil.optimisation.operators import \
+    CompositionOperator, BlockOperator, LinearOperator, GradientOperator, ScaledOperator
+from cil.plugins.ccpi_regularisation.functions import FGP_TV
 from ccpi.filters import regularisers
-from ccpi.utilities.multiprocessing import NUM_THREADS
+from cil.utilities.multiprocessing import NUM_THREADS
 
 __version__ = '0.1.0'
 args = docopt(__doc__, version=__version__)
@@ -514,9 +514,6 @@ def set_up_reconstructor(use_gpu, num_ms, acq_models, resamplers, masks, sinos, 
     if not os.path.exists(param_path):
         os.makedirs(param_path)
 
-    if normalise:
-        raise error('options {} and regularization={} are not yet implemented together'.format(normalise, regularizer))
-
     # We'll need an additive term (eta). If randoms are present, use them
     # Else, use a scaled down version of the sinogram
     etas = rands if rands else [sino * 0 + 1e-5 for sino in sinos]
@@ -574,15 +571,31 @@ def set_up_reconstructor(use_gpu, num_ms, acq_models, resamplers, masks, sinos, 
     else:
         prob = None
 
-    if not precond:
-        if algo == 'pdhg':
+    if normalise or not precond:
+        if algo = 'pdhg':
             # we want the norm of the whole physical BlockOp
             normK = get_proj_norm(BlockOperator(*C),param_path)
-            sigma = gamma/normK
-            tau = 1/(normK*gamma)
         elif algo == 'spdhg':
             # we want the norm of each component
             normK = get_proj_normi(BlockOperator(*C),nsub,param_path)
+        
+    if normalise:
+        if algo = 'pdhg':
+            # we want the norm of the whole physical BlockOp
+            K = ScaledOperator(K, 1/normK)
+            # XXX check this
+            F = ScaledFunction(F, normK)
+            normK = 1.1
+        else:
+            raise error('options normalise and {} not yet implemented together'.format(algo))
+            
+
+    if not precond:
+        if algo == 'pdhg':
+            # we want the norm of the whole physical BlockOp
+            sigma = gamma/normK
+            tau = 1/(normK*gamma)
+        elif algo == 'spdhg':
             # we'll let spdhg do its default implementation
             sigma = None
             tau = None

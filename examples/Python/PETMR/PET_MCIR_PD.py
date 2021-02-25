@@ -89,10 +89,11 @@ import sirf.STIR as pet
 from cil.framework import BlockDataContainer, ImageGeometry, BlockGeometry
 from cil.optimisation.algorithms import PDHG, SPDHG
 from cil.optimisation.functions import \
-    KullbackLeibler, BlockFunction, IndicatorBox, MixedL21Norm, ScaledFunction, L2NormSquared
+    KullbackLeibler, BlockFunction, IndicatorBox, MixedL21Norm, ScaledFunction
 from cil.optimisation.operators import \
     CompositionOperator, BlockOperator, LinearOperator, GradientOperator, ScaledOperator
 from cil.plugins.ccpi_regularisation.functions import FGP_TV
+
 from ccpi.filters import regularisers
 from cil.utilities.multiprocessing import NUM_THREADS
 
@@ -708,7 +709,7 @@ def set_up_explicit_reconstructor(use_gpu, num_ms, image, acq_models, resamplers
             fi[k * num_ms + i] = KullbackLeibler(b=sinos[i], eta=etas[i], mask=masks[k].as_array(),use_numba=True)
 
     # define gradient
-    Grad = Gradient(image, backend='c', correlation='SpaceChannel')
+    Grad = GradientOperator(image, backend='c', correlation='SpaceChannel')
     normGrad = get_grad_norm(Grad,param_path)
 
     # define data fit
